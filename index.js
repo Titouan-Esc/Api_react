@@ -76,3 +76,48 @@ app.post("/api/v1/posts", (req,res) => {
 })
 
 // ! put lui sert à update notre post c'est assez simple car il suffit juste de reprendre les choses que nous avons écrite au dessus
+app.put("/api/v1/posts/:id", (req,res) => {
+    // ? On reprend ici ce qu'on avait mis dans le get
+    const post = posts.find((e) => {
+        return e.id === parseInt(req.params.id)
+    });
+    if(!post) {
+        res.status(404).send("<h2>Le post que tu met à jour n'existe pas</h2>");
+    }
+
+    // ? On met ici ce qu'on a mis au debut du post
+    const schema = Joi.object({
+        titre: Joi.string().min(2).required(),
+        contenu: Joi.string().min(10).required()
+    });
+
+    const result = schema.validate(req.body);
+    console.log(result.error)
+
+    if(result.error) {
+        res.status(400).send(result.error.details[0].message);
+        return;
+    }
+
+    // ? Et ensuite on ajoute quelque chose de simple et le tour et joué
+    post.titre = req.body.titre;
+    post.contenu = req.body.contenu;
+
+    res.send(post);
+})
+
+// ! Dernière fonction qui sera la dernière et enfin nous auron un CRUD avec une stack MERN
+
+app.delete("/api/v1/posts/:id", (req,res) => {
+    // ? On remet encore une fois le get pour verifier si le contenu existe
+    const post = posts.find((e) => {
+        return e.id === parseInt(req.params.id)
+    });
+    if(!post) {
+        res.status(404).send("<h2>Le post que tu essaie de supprimer n'existe pas</h2>");
+    }
+
+    const postIndex = posts.indexOf(post);
+    posts.splice(postIndex, 1);
+    res.send(posts);
+})
